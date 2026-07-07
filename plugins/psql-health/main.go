@@ -1,0 +1,71 @@
+package main
+
+import (
+	"os"
+
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/jackc/pgx/v5"
+	lib "github.com/monobilisim/monokit2/lib"
+)
+
+// comes from -ldflags "-X 'main.version=version'" flag in ci build
+var (
+	version     string
+	pluginName  string   = "mysqlHealth"
+	up          string   = "up"
+	down        string   = "down"
+	configFiles []string = []string{"db.yml"}
+)
+
+var Connection *pgx.Conn
+
+func main() {
+	if len(os.Args) > 1 {
+		lib.HandleCommonPluginArgs(os.Args, version, configFiles)
+		return
+	}
+
+	err := lib.InitConfig(configFiles...)
+	if err != nil {
+		panic("Failed to initialize config: " + err.Error())
+	}
+
+	logger, err := lib.InitLogger()
+	if err != nil {
+		panic("Failed to initialize logger: " + err.Error())
+	}
+
+	lib.InitializeDatabase()
+
+	if !lib.DBConfig.PostgreSql.Alarm.Enabled {
+		logger.Info().Msg("MySQL Health monitoring plugin is disabled in configuration. Exiting plugin.")
+		return
+	}
+
+	logger.Info().Msg("Starting MySQL Health monitoring plugin...")
+
+	Connection, err = ConnectPSQL(logger)
+	if err != nil {
+		logger.Error().Err(err).Msg("Failed to establish PostgreSql connection. Exiting plugin.")
+		Connection = nil
+		return
+	}
+
+	if Connection == nil {
+		logger.Error().Msg("PostgreSql connection is not established. Exiting plugin.")
+		return
+	}
+
+	psqllInDocker := IsPsqlInDocker(logger)
+	if psqllInDocker {
+		logger.Info().Msg("PostgreSql appears to be running in Docker. This may affect connection methods and performance.")
+	}
+
+	CheckProcess(logger)
+
+	if lib.DBConfig.Mysql.AutoRepair.Enabled {
+		// AutoRepair(logger)
+	}
+
+	// CheckPMM(logger)
+}

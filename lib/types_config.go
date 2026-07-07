@@ -126,6 +126,15 @@ type DBConfigType struct {
 		} `yaml:"alarm"`
 	} `yaml:"mysql"`
 
+	PostgreSql struct {
+		ConnectionString string `yaml:"connection_string"`
+		ActivityLimit    int    `yaml:"activity-limit"`
+
+		Alarm struct {
+			Enabled bool `yaml:"enabled"`
+		} `yaml:"alarm"`
+	} `yaml:"postgresql"`
+
 	MariaDB struct {
 		ProcessLimit int `yaml:"process-limit"`
 		Credentials  struct {
