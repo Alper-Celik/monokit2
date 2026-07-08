@@ -38,7 +38,7 @@ func main() {
 	lib.InitializeDatabase()
 
 	if !lib.DBConfig.PostgreSql.Alarm.Enabled {
-		logger.Info().Msg("MySQL Health monitoring plugin is disabled in configuration. Exiting plugin.")
+		logger.Info().Msg("PostgreSql Health monitoring plugin is disabled in configuration. Exiting plugin.")
 		return
 	}
 
@@ -61,11 +61,7 @@ func main() {
 		logger.Info().Msg("PostgreSql appears to be running in Docker. This may affect connection methods and performance.")
 	}
 
-	CheckProcess(logger)
+	CheckActivity(logger)
 
-	if lib.DBConfig.Mysql.AutoRepair.Enabled {
-		// AutoRepair(logger)
-	}
-
-	// CheckPMM(logger)
+	CheckPMM(logger)
 }

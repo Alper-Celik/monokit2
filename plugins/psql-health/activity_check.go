@@ -8,35 +8,9 @@ import (
 	"github.com/rs/zerolog"
 )
 
-const query = `
-	SELECT
-  datid::TEXT              ,-- oid
-  datname::TEXT            ,-- name
-  client_addr::TEXT        ,-- inet
-  client_port::TEXT        ,-- integer
-  backend_start::TEXT      ,-- timestamp with time zone
-  xact_start::TEXT         ,-- timestamp with time zone
-  query_start::TEXT        ,-- timestamp with time zone
-  state_change::TEXT       ,-- timestamp with time zone
-  backend_xid::TEXT        ,-- xid
-  backend_xmin::TEXT       ,-- xid
-  query_id::TEXT           ,-- bigint
-  pid::TEXT                ,-- integer
-  leader_pid::TEXT         ,-- integer
-  usesysid::TEXT           ,-- oid
-  client_hostname::TEXT    ,-- text
-  wait_event_type::TEXT    ,-- text
-  state::TEXT              ,-- text
-  backend_type::TEXT       ,-- text
-  wait_event::TEXT         ,-- text
-  application_name::TEXT   ,-- text
-  query::TEXT              ,-- text
-  usename::TEXT            ,-- name
-  datname::TEXT             -- name
-	FROM pg_stat_activity
-	`
+const query = "SELECT * FROM pg_stat_activity"
 
-func CheckProcess(logger zerolog.Logger) {
+func CheckActivity(logger zerolog.Logger) {
 	moduleName := "process"
 	logger.Info().Msg("Checking PostgreSql processes...")
 
