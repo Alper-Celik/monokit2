@@ -1,7 +1,11 @@
 
 # Feature Parity with <https://github.com/monobilisim/monokit>
 
-## Database healthchecks
+## plugins
+
+- [ ] __Elastic Search__
+
+- [ ] __Kubernetes__
 
 - [-] __MySql__
   - [X] Up check
@@ -27,6 +31,8 @@
   - [X] Auto repair with timing
   - [X] PMM check
 
+- [- ] __OS Health__
+
 - [-] __PostgreSql__ (currently for #34)
   - [X] Up check
   - [X] Process check
@@ -37,3 +43,23 @@
   - [ ] Wall-g support
   - [ ] Patroni cluster monitoring
   - [X] PMM check
+
+- [ ] __Proxmox Mail Gateway__
+
+- [ ] __Postal__
+
+- [ ] __Pritunl__
+
+- [ ] __Redis__
+
+- [ ] __RabbitMq__
+
+- [ ] __Vault Service__
+
+- [ ] __Windows OS__
+
+- [ ] __WPPConnect__
+
+- [ ] __Zimbra__
+
+- [ ] __Zimbra Ldap__
