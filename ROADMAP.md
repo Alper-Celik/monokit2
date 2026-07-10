@@ -9,6 +9,18 @@
   - [ ] Problematic allocation alarm
 
 - [ ] __Kubernetes__
+  - [ ] kube-vip health check
+  - [ ] Node health check
+  - [ ] Pod health check
+  - [ ] RKE2 Ingress Nginx health check
+  - [ ] Cert Manager health check
+  - [ ] Cluster Api Cert health check
+  - [ ] RKE2 health check
+  - [ ] Kubernetes end of life check
+  - [ ] ETCD backup and sttus check
+  - [ ] Namespace Compliance check
+  - [ ] Master Taint Compliance check
+  - [ ] continius mode alongside regular one shot mode with cron ?
 
 - [-] __MySql__
   - [X] Up check
