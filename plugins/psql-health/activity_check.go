@@ -8,10 +8,12 @@ import (
 	"github.com/rs/zerolog"
 )
 
-const query = "SELECT * FROM pg_stat_activity"
+const (
+	query      = "SELECT * FROM pg_stat_activity"
+	moduleName = "process"
+)
 
 func CheckActivity(logger zerolog.Logger) {
-	moduleName := "process"
 	logger.Info().Msg("Checking PostgreSql processes...")
 
 	activities := make([]map[string]string, 0, 30)
@@ -47,12 +49,16 @@ func CheckActivity(logger zerolog.Logger) {
 	logger.Info().Msgf("Successfully retrieved PostgreSql processes. %d processes found.", rowCount)
 	logger.Debug().Interface("activities", activities).Msg("PostgreSql process details")
 
+	checkThreshold(rowCount, logger)
+}
+
+func checkThreshold(activityCount int, logger zerolog.Logger) {
 	activityThreshold := lib.DBConfig.PostgreSql.ActivityLimit
 
 	// Down alarm if process count is above threshold
 	if lib.DBConfig.PostgreSql.Alarm.Enabled {
-		if rowCount > activityThreshold {
-			alarmMessage := fmt.Sprintf("[%s] - %s - PostgreSql activity count has been more than the set limit %d, (%d)", pluginName, lib.GlobalConfig.Hostname, activityThreshold, rowCount)
+		if activityCount > activityThreshold {
+			alarmMessage := fmt.Sprintf("[%s] - %s - PostgreSql activity count has been more than the set limit %d, (%d)", pluginName, lib.GlobalConfig.Hostname, activityThreshold, activityCount)
 
 			if lib.GlobalConfig.ZulipAlarm.Enabled {
 				lib.SendZulipAlarm(alarmMessage, pluginName, moduleName, down)
@@ -61,8 +67,8 @@ func CheckActivity(logger zerolog.Logger) {
 		}
 
 		// UP alarm if process count is below threshold
-		if rowCount < activityThreshold {
-			alarmMessage := fmt.Sprintf("[%s] - %s - PostgreSql activity count is back to normal (%d)", pluginName, lib.GlobalConfig.Hostname, rowCount)
+		if activityCount < activityThreshold {
+			alarmMessage := fmt.Sprintf("[%s] - %s - PostgreSql activity count is back to normal (%d)", pluginName, lib.GlobalConfig.Hostname, activityCount)
 
 			if lib.GlobalConfig.ZulipAlarm.Enabled {
 				lastAlarm, err := lib.GetLastZulipAlarm(pluginName, moduleName)
