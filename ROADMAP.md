@@ -52,8 +52,8 @@
   - [X] Up check
   - [X] Process check
   - [ ] uptime monitoring
-  - [ ] Check connections
-  - [ ] Version Check
+  - [X] Check connections
+  - [X] Version Check (Moved to OS health)
   - [-] Check running querries (missing alerts on long running queries)
   - [ ] Wall-g support
   - [ ] Patroni cluster monitoring
