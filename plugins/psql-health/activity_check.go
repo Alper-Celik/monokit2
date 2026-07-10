@@ -17,6 +17,7 @@ func CheckActivity(logger zerolog.Logger) {
 	logger.Info().Msg("Checking PostgreSql processes...")
 
 	activities := make([]map[string]string, 0, 30)
+	activeActivities := make([]map[string]string, 0, 10)
 
 	rows, err := Connection.Query(context.Background(), query)
 	if err != nil {
@@ -25,7 +26,6 @@ func CheckActivity(logger zerolog.Logger) {
 	}
 	defer rows.Close()
 
-	rowCount := 0
 	for rows.Next() {
 		columns, err := rows.Values()
 		if err != nil {
@@ -42,7 +42,10 @@ func CheckActivity(logger zerolog.Logger) {
 		}
 		activities = append(activities, row)
 
-		rowCount++
+		if row["state"] == "active" {
+			activeActivities = append(activeActivities, row)
+		}
+
 	}
 
 	if err := rows.Err(); err != nil {
@@ -50,19 +53,19 @@ func CheckActivity(logger zerolog.Logger) {
 		return
 	}
 
-	logger.Info().Msgf("Successfully retrieved PostgreSql processes. %d processes found.", rowCount)
+	logger.Info().Msgf("Successfully retrieved PostgreSql processes. %d processes found.", len(activities))
 	logger.Debug().Interface("activities", activities).Msg("PostgreSql process details")
 
-	checkThreshold(rowCount, logger)
+	checkThreshold(len(activeActivities), logger)
 }
 
-func checkThreshold(activityCount int, logger zerolog.Logger) {
+func checkThreshold(activeActivityCount int, logger zerolog.Logger) {
 	activityThreshold := lib.DBConfig.PostgreSql.ActivityLimit
 
 	// Down alarm if process count is above threshold
 	if lib.DBConfig.PostgreSql.Alarm.Enabled {
-		if activityCount > activityThreshold {
-			alarmMessage := fmt.Sprintf("[%s] - %s - PostgreSql activity count has been more than the set limit %d, (%d)", pluginName, lib.GlobalConfig.Hostname, activityThreshold, activityCount)
+		if activeActivityCount > activityThreshold {
+			alarmMessage := fmt.Sprintf("[%s] - %s - PostgreSql activity count has been more than the set limit %d, (%d)", pluginName, lib.GlobalConfig.Hostname, activityThreshold, activeActivityCount)
 
 			if lib.GlobalConfig.ZulipAlarm.Enabled {
 				lib.SendZulipAlarm(alarmMessage, pluginName, moduleName, down)
@@ -71,8 +74,8 @@ func checkThreshold(activityCount int, logger zerolog.Logger) {
 		}
 
 		// UP alarm if process count is below threshold
-		if activityCount < activityThreshold {
-			alarmMessage := fmt.Sprintf("[%s] - %s - PostgreSql activity count is back to normal (%d)", pluginName, lib.GlobalConfig.Hostname, activityCount)
+		if activeActivityCount < activityThreshold {
+			alarmMessage := fmt.Sprintf("[%s] - %s - PostgreSql activity count is back to normal (%d)", pluginName, lib.GlobalConfig.Hostname, activeActivityCount)
 
 			if lib.GlobalConfig.ZulipAlarm.Enabled {
 				lastAlarm, err := lib.GetLastZulipAlarm(pluginName, moduleName)
