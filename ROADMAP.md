@@ -4,6 +4,9 @@
 ## plugins
 
 - [ ] __Elastic Search__
+  - [ ] Status color check
+  - [ ] Shard assignment check
+  - [ ] Problematic allocation alarm
 
 - [ ] __Kubernetes__
 
