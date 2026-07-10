@@ -3,15 +3,21 @@ package main
 import (
 	"context"
 	"fmt"
+	"time"
 
 	lib "github.com/monobilisim/monokit2/lib"
 	"github.com/rs/zerolog"
 )
 
 const (
-	query      = "SELECT * FROM pg_stat_activity"
+	query      = "SELECT now() - pg_stat_activity.query_start AS duration, * FROM pg_stat_activity"
 	moduleName = "process"
 )
+
+type activityInfo struct {
+	duration time.Duration
+	fields   map[string]string
+}
 
 func CheckActivity(logger zerolog.Logger) {
 	logger.Info().Msg("Checking PostgreSql processes...")
@@ -40,6 +46,7 @@ func CheckActivity(logger zerolog.Logger) {
 			}
 			row[fd.Name] = columnStr
 		}
+		rows.Scan()
 		activities = append(activities, row)
 
 		if row["state"] == "active" {
