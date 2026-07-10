@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	query      = "SELECT now() - pg_stat_activity.query_start AS duration, * FROM pg_stat_activity"
-	moduleName = "process"
+	activityQuery = "SELECT now() - pg_stat_activity.query_start AS duration, * FROM pg_stat_activity"
+	moduleName    = "process"
 )
 
 type activityInfo struct {
@@ -25,7 +25,7 @@ func CheckActivity(logger zerolog.Logger) {
 	activities := make([]activityInfo, 0, 30)
 	activeActivities := make([]activityInfo, 0, 10)
 
-	rows, err := Connection.Query(context.Background(), query)
+	rows, err := Connection.Query(context.Background(), activityQuery)
 	if err != nil {
 		logger.Error().Err(err).Msg("Failed to query pg_stat_activity")
 		return

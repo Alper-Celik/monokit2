@@ -51,7 +51,7 @@
 - [-] __PostgreSql__ (currently for #34)
   - [X] Up check
   - [X] Process check
-  - [ ] uptime monitoring
+  - [x] uptime monitoring
   - [X] Check connections
   - [X] Version Check (Moved to OS health)
   - [X] Check running querries (missing alerts on long running queries)
