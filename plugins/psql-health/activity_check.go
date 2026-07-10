@@ -34,7 +34,11 @@ func CheckActivity(logger zerolog.Logger) {
 		}
 		row := make(map[string]string)
 		for i, fd := range rows.FieldDescriptions() {
-			row[fd.Name] = fmt.Sprint(columns[i])
+			columnStr := fmt.Sprint(columns[i])
+			if len(columnStr) > 150 {
+				columnStr = columnStr[:147] + "..."
+			}
+			row[fd.Name] = columnStr
 		}
 		activities = append(activities, row)
 
