@@ -22,8 +22,8 @@ type activityInfo struct {
 func CheckActivity(logger zerolog.Logger) {
 	logger.Info().Msg("Checking PostgreSql processes...")
 
-	activities := make([]map[string]string, 0, 30)
-	activeActivities := make([]map[string]string, 0, 10)
+	activities := make([]activityInfo, 0, 30)
+	activeActivities := make([]activityInfo, 0, 10)
 
 	rows, err := Connection.Query(context.Background(), query)
 	if err != nil {
@@ -38,18 +38,20 @@ func CheckActivity(logger zerolog.Logger) {
 			logger.Error().Err(err).Msg("Failed to scann a row of pg_stat_activity")
 			return
 		}
-		row := make(map[string]string)
+		row := activityInfo{
+			fields: map[string]string{},
+		}
 		for i, fd := range rows.FieldDescriptions() {
 			columnStr := fmt.Sprint(columns[i])
 			if len(columnStr) > 150 {
 				columnStr = columnStr[:147] + "..."
 			}
-			row[fd.Name] = columnStr
+			row.fields[fd.Name] = columnStr
 		}
-		rows.Scan()
+		rows.Scan(&row.duration)
 		activities = append(activities, row)
 
-		if row["state"] == "active" {
+		if row.fields["state"] == "active" {
 			activeActivities = append(activeActivities, row)
 		}
 
@@ -64,6 +66,46 @@ func CheckActivity(logger zerolog.Logger) {
 	logger.Debug().Interface("activities", activities).Msg("PostgreSql process details")
 
 	checkThreshold(len(activeActivities), logger)
+}
+
+func checkLongRunningQueries(activeActivities []activityInfo, logger zerolog.Logger) {
+	// Down alarm if there is long running queries
+	if lib.DBConfig.PostgreSql.Alarm.Enabled &&
+		lib.DBConfig.PostgreSql.Alarm.LongQuery.Enabled {
+
+		longRunningActivities := make([]activityInfo, len(activeActivities))
+
+		for _, activity := range activeActivities {
+			if activity.duration.Seconds() > float64(lib.DBConfig.PostgreSql.Alarm.LongQuery.DurationSeconds) {
+				longRunningActivities = append(longRunningActivities, activity)
+			}
+		}
+
+		if len(longRunningActivities) > 0 {
+			alarmMessage := fmt.Sprintf("[%s] - %s - PostgreSql has %d query(ies) running longer than %d seconds", pluginName, lib.GlobalConfig.Hostname, len(longRunningActivities), lib.DBConfig.PostgreSql.Alarm.LongQuery.DurationSeconds)
+
+			if lib.GlobalConfig.ZulipAlarm.Enabled {
+				lib.SendZulipAlarm(alarmMessage, pluginName, moduleName, down)
+			}
+
+		}
+
+		// UP alarm if process count is below threshold
+		if len(longRunningActivities) == 0 {
+			alarmMessage := fmt.Sprintf("[%s] - %s - PostgreSql long running queries ended", pluginName, lib.GlobalConfig.Hostname)
+
+			if lib.GlobalConfig.ZulipAlarm.Enabled {
+				lastAlarm, err := lib.GetLastZulipAlarm(pluginName, moduleName)
+				if err != nil {
+					logger.Error().Err(err).Msg("Failed to get last Zulip alarm")
+				}
+
+				if lastAlarm.Status == down {
+					lib.SendZulipAlarm(alarmMessage, pluginName, moduleName, up)
+				}
+			}
+		}
+	}
 }
 
 func checkThreshold(activeActivityCount int, logger zerolog.Logger) {

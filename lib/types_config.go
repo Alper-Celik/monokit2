@@ -131,7 +131,11 @@ type DBConfigType struct {
 		ActivityLimit    int    `yaml:"activity-limit"`
 
 		Alarm struct {
-			Enabled bool `yaml:"enabled"`
+			Enabled   bool `yaml:"enabled"`
+			LongQuery struct {
+				Enabled         bool `yaml:"enabled"`
+				DurationSeconds int  `yaml:"duration-seconds"`
+			} `yaml:"long-query"`
 		} `yaml:"alarm"`
 	} `yaml:"postgresql"`
 
