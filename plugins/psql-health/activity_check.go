@@ -5,18 +5,19 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/jackc/pgx/v5/pgtype"
 	lib "github.com/monobilisim/monokit2/lib"
 	"github.com/rs/zerolog"
 )
 
 const (
-	activityQuery = "SELECT now() - pg_stat_activity.query_start AS duration, * FROM pg_stat_activity"
-	moduleName    = "process"
+	query      = "SELECT clock_timestamp() - pg_stat_activity.query_start AS duration, * FROM pg_stat_activity"
+	moduleName = "process"
 )
 
 type activityInfo struct {
-	duration time.Duration
-	fields   map[string]string
+	Duration *time.Duration
+	Fields   map[string]string
 }
 
 func CheckActivity(logger zerolog.Logger) {
@@ -39,19 +40,24 @@ func CheckActivity(logger zerolog.Logger) {
 			return
 		}
 		row := activityInfo{
-			fields: map[string]string{},
+			Fields: map[string]string{},
 		}
 		for i, fd := range rows.FieldDescriptions() {
 			columnStr := fmt.Sprint(columns[i])
 			if len(columnStr) > 150 {
 				columnStr = columnStr[:147] + "..."
 			}
-			row.fields[fd.Name] = columnStr
+			row.Fields[fd.Name] = columnStr
 		}
-		rows.Scan(&row.duration)
+
+		if columns[0] != nil {
+			dur := ToDuration(columns[0].(pgtype.Interval))
+			row.Duration = &dur
+		}
+
 		activities = append(activities, row)
 
-		if row.fields["state"] == "active" {
+		if row.Fields["state"] == "active" {
 			activeActivities = append(activeActivities, row)
 		}
 
@@ -68,6 +74,18 @@ func CheckActivity(logger zerolog.Logger) {
 	checkThreshold(len(activeActivities), logger)
 }
 
+func ToDuration(i pgtype.Interval) time.Duration {
+	if !i.Valid {
+		return -1
+	}
+	const usecPerDay = 24 * 3600 * 1_000_000
+	totalUsec := i.Microseconds +
+		(int64(i.Days) * usecPerDay) +
+		(int64(i.Months) * 30 * usecPerDay)
+
+	return time.Duration(totalUsec) * time.Microsecond
+}
+
 func checkLongRunningQueries(activeActivities []activityInfo, logger zerolog.Logger) {
 	// Down alarm if there is long running queries
 	if lib.DBConfig.PostgreSql.Alarm.Enabled &&
@@ -76,7 +94,7 @@ func checkLongRunningQueries(activeActivities []activityInfo, logger zerolog.Log
 		longRunningActivities := make([]activityInfo, len(activeActivities))
 
 		for _, activity := range activeActivities {
-			if activity.duration.Seconds() > float64(lib.DBConfig.PostgreSql.Alarm.LongQuery.DurationSeconds) {
+			if activity.Duration.Seconds() > float64(lib.DBConfig.PostgreSql.Alarm.LongQuery.DurationSeconds) {
 				longRunningActivities = append(longRunningActivities, activity)
 			}
 		}
