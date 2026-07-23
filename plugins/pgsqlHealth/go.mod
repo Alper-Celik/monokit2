@@ -1,4 +1,4 @@
-module github.com/monobilisim/monokit2/plugins/psql-health
+module github.com/monobilisim/monokit2/plugins/pgsqlHealth
 
 go 1.25.5
 
