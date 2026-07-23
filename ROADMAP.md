@@ -17,7 +17,7 @@
   - [ ] Cluster Api Cert health check
   - [ ] RKE2 health check
   - [ ] Kubernetes end of life check
-  - [ ] ETCD backup and sttus check
+  - [ ] ETCD backup and status check
   - [ ] Namespace Compliance check
   - [ ] Master Taint Compliance check
   - [ ] continius mode alongside regular one shot mode with cron ?

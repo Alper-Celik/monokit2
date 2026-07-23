@@ -55,7 +55,7 @@ mariadb:
     enabled: true
 
 postgresql:
-  connection-string: postgres://postgres:123@localhost
+  connection-string: "postgres://postgres:123@localhost"
   activity-limit: 30
   alarm:
     enabled: true
