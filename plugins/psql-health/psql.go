@@ -9,9 +9,9 @@ import (
 )
 
 func ConnectPSQL(logger zerolog.Logger) (*pgx.Conn, error) {
-	conn, err := pgx.Connect(context.Background(), lib.DBConfig.PostgreSql.ConnectionString)
+	conn, err := pgx.Connect(context.Background(), lib.DBConfig.PostgreSQL.ConnectionString)
 	if err != nil {
-		logger.Error().Err(err).Msg("Failed to connect to PostgreSql")
+		logger.Error().Err(err).Msg("Failed to connect to PostgreSQL")
 		return nil, err
 	}
 

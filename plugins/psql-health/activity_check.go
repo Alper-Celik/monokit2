@@ -21,7 +21,7 @@ type activityInfo struct {
 }
 
 func CheckActivity(logger zerolog.Logger) {
-	logger.Info().Msg("Checking PostgreSql processes...")
+	logger.Info().Msg("Checking PostgreSQL processes...")
 
 	activities := make([]activityInfo, 0, 30)
 	activeActivities := make([]activityInfo, 0, 10)
@@ -68,8 +68,8 @@ func CheckActivity(logger zerolog.Logger) {
 		return
 	}
 
-	logger.Info().Msgf("Successfully retrieved PostgreSql processes. %d processes found.", len(activities))
-	logger.Debug().Interface("activities", activities).Msg("PostgreSql process details")
+	logger.Info().Msgf("Successfully retrieved PostgreSQL processes. %d processes found.", len(activities))
+	logger.Debug().Interface("activities", activities).Msg("PostgreSQL process details")
 
 	checkThreshold(len(activeActivities), logger)
 }
@@ -88,19 +88,19 @@ func ToDuration(i pgtype.Interval) time.Duration {
 
 func checkLongRunningQueries(activeActivities []activityInfo, logger zerolog.Logger) {
 	// Down alarm if there is long running queries
-	if lib.DBConfig.PostgreSql.Alarm.Enabled &&
-		lib.DBConfig.PostgreSql.Alarm.LongQuery.Enabled {
+	if lib.DBConfig.PostgreSQL.Alarm.Enabled &&
+		lib.DBConfig.PostgreSQL.Alarm.LongQuery.Enabled {
 
 		longRunningActivities := make([]activityInfo, len(activeActivities))
 
 		for _, activity := range activeActivities {
-			if activity.Duration.Seconds() > float64(lib.DBConfig.PostgreSql.Alarm.LongQuery.DurationSeconds) {
+			if activity.Duration.Seconds() > float64(lib.DBConfig.PostgreSQL.Alarm.LongQuery.DurationSeconds) {
 				longRunningActivities = append(longRunningActivities, activity)
 			}
 		}
 
 		if len(longRunningActivities) > 0 {
-			alarmMessage := fmt.Sprintf("[%s] - %s - PostgreSql has %d query(ies) running longer than %d seconds", pluginName, lib.GlobalConfig.Hostname, len(longRunningActivities), lib.DBConfig.PostgreSql.Alarm.LongQuery.DurationSeconds)
+			alarmMessage := fmt.Sprintf("[%s] - %s - PostgreSQL has %d query(ies) running longer than %d seconds", pluginName, lib.GlobalConfig.Hostname, len(longRunningActivities), lib.DBConfig.PostgreSQL.Alarm.LongQuery.DurationSeconds)
 
 			if lib.GlobalConfig.ZulipAlarm.Enabled {
 				lib.SendZulipAlarm(alarmMessage, pluginName, moduleName, down)
@@ -110,7 +110,7 @@ func checkLongRunningQueries(activeActivities []activityInfo, logger zerolog.Log
 
 		// UP alarm if process count is below threshold
 		if len(longRunningActivities) == 0 {
-			alarmMessage := fmt.Sprintf("[%s] - %s - PostgreSql long running queries ended", pluginName, lib.GlobalConfig.Hostname)
+			alarmMessage := fmt.Sprintf("[%s] - %s - PostgreSQL long running queries ended", pluginName, lib.GlobalConfig.Hostname)
 
 			if lib.GlobalConfig.ZulipAlarm.Enabled {
 				lastAlarm, err := lib.GetLastZulipAlarm(pluginName, moduleName)
@@ -127,12 +127,12 @@ func checkLongRunningQueries(activeActivities []activityInfo, logger zerolog.Log
 }
 
 func checkThreshold(activeActivityCount int, logger zerolog.Logger) {
-	activityThreshold := lib.DBConfig.PostgreSql.ActivityLimit
+	activityThreshold := lib.DBConfig.PostgreSQL.ActivityLimit
 
 	// Down alarm if process count is above threshold
-	if lib.DBConfig.PostgreSql.Alarm.Enabled {
+	if lib.DBConfig.PostgreSQL.Alarm.Enabled {
 		if activeActivityCount > activityThreshold {
-			alarmMessage := fmt.Sprintf("[%s] - %s - PostgreSql activity count has been more than the set limit %d, (%d)", pluginName, lib.GlobalConfig.Hostname, activityThreshold, activeActivityCount)
+			alarmMessage := fmt.Sprintf("[%s] - %s - PostgreSQL activity count has been more than the set limit %d, (%d)", pluginName, lib.GlobalConfig.Hostname, activityThreshold, activeActivityCount)
 
 			if lib.GlobalConfig.ZulipAlarm.Enabled {
 				lib.SendZulipAlarm(alarmMessage, pluginName, moduleName, down)
@@ -142,7 +142,7 @@ func checkThreshold(activeActivityCount int, logger zerolog.Logger) {
 
 		// UP alarm if process count is below threshold
 		if activeActivityCount < activityThreshold {
-			alarmMessage := fmt.Sprintf("[%s] - %s - PostgreSql activity count is back to normal (%d)", pluginName, lib.GlobalConfig.Hostname, activeActivityCount)
+			alarmMessage := fmt.Sprintf("[%s] - %s - PostgreSQL activity count is back to normal (%d)", pluginName, lib.GlobalConfig.Hostname, activeActivityCount)
 
 			if lib.GlobalConfig.ZulipAlarm.Enabled {
 				lastAlarm, err := lib.GetLastZulipAlarm(pluginName, moduleName)

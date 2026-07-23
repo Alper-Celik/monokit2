@@ -54,12 +54,10 @@ mariadb:
   alarm:
     enabled: true
 
-# Not Implemented Yet
-postgres:
-  limits:
-    process: 50
-    query: 25
-    conn_percent: 70
+postgresql:
+  connection-string: postgres://postgres:123@localhost
+  activity-limit: 30
   alarm:
     enabled: true
-  leader_switch_hook: "echo 'leader switch'"
+  pmm-agent:
+    enabled: false

@@ -37,8 +37,8 @@ func main() {
 
 	lib.InitializeDatabase()
 
-	if !lib.DBConfig.PostgreSql.Alarm.Enabled {
-		logger.Info().Msg("PostgreSql Health monitoring plugin is disabled in configuration. Exiting plugin.")
+	if !lib.DBConfig.PostgreSQL.Alarm.Enabled {
+		logger.Info().Msg("PostgreSQL Health monitoring plugin is disabled in configuration. Exiting plugin.")
 		return
 	}
 
@@ -46,19 +46,19 @@ func main() {
 
 	Connection, err = ConnectPSQL(logger)
 	if err != nil {
-		logger.Error().Err(err).Msg("Failed to establish PostgreSql connection. Exiting plugin.")
+		logger.Error().Err(err).Msg("Failed to establish PostgreSQL connection. Exiting plugin.")
 		Connection = nil
 		return
 	}
 
 	if Connection == nil {
-		logger.Error().Msg("PostgreSql connection is not established. Exiting plugin.")
+		logger.Error().Msg("PostgreSQL connection is not established. Exiting plugin.")
 		return
 	}
 
 	psqllInDocker := IsPsqlInDocker(logger)
 	if psqllInDocker {
-		logger.Info().Msg("PostgreSql appears to be running in Docker. This may affect connection methods and performance.")
+		logger.Info().Msg("PostgreSQL appears to be running in Docker. This may affect connection methods and performance.")
 	}
 
 	CheckActivity(logger)
