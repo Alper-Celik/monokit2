@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	query      = "SELECT clock_timestamp() - pg_stat_activity.query_start AS duration, * FROM pg_stat_activity"
-	moduleName = "process"
+	activityQuery = "SELECT clock_timestamp() - pg_stat_activity.query_start AS duration, * FROM pg_stat_activity"
+	moduleName    = "process"
 )
 
 type activityInfo struct {
