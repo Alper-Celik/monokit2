@@ -20,7 +20,7 @@
   - [ ] ETCD backup and status check
   - [ ] Namespace Compliance check
   - [ ] Master Taint Compliance check
-  - [ ] continius mode alongside regular one shot mode with cron ?
+  - [ ] continuous mode alongside regular one shot mode with cron ?
 
 - [-] __MySql__
   - [X] Up check
@@ -54,7 +54,7 @@
   - [x] uptime monitoring
   - [X] Check connections
   - [X] Version Check (Moved to OS health)
-  - [X] Check running querries (missing alerts on long running queries)
+  - [X] Check running queries (missing alerts on long running queries)
   - [ ] Wall-g support
   - [ ] Patroni cluster monitoring
   - [X] PMM check

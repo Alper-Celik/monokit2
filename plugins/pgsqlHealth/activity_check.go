@@ -36,8 +36,7 @@ func CheckActivity(logger zerolog.Logger) {
 	for rows.Next() {
 		columns, err := rows.Values()
 		if err != nil {
-			logger.Error().Err(err).Msg("Failed to scann a row of pg_stat_activity")
-			return
+			logger.Error().Err(err).Msg("Failed to scan a row of pg_stat_activity")
 		}
 		row := activityInfo{
 			Fields: map[string]string{},
@@ -71,8 +70,8 @@ func CheckActivity(logger zerolog.Logger) {
 	logger.Info().Msgf("Successfully retrieved PostgreSQL processes. %d processes found.", len(activities))
 	logger.Debug().Interface("activities", activities).Msg("PostgreSQL process details")
 
+	checkLongRunningQueries(activeActivities, logger)
 	checkThreshold(len(activeActivities), logger)
-}
 
 func ToDuration(i pgtype.Interval) time.Duration {
 	if !i.Valid {

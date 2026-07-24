@@ -19,7 +19,7 @@ func LogUptime(logger zerolog.Logger) {
 	if err != nil {
 		return
 	}
-	logger.Debug().Interface("uptime", uptime).Msg("PostgreSql uptime")
+	logger.Debug().Interface("uptime", uptime).Msg("PostgreSQL uptime")
 }
 
 func GetUptime(logger zerolog.Logger) (uptime UptimeInfo, err error) {

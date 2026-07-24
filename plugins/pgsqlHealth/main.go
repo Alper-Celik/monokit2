@@ -3,7 +3,6 @@ package main
 import (
 	"os"
 
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/jackc/pgx/v5"
 	lib "github.com/monobilisim/monokit2/lib"
 )
@@ -11,7 +10,7 @@ import (
 // comes from -ldflags "-X 'main.version=version'" flag in ci build
 var (
 	version     string
-	pluginName  string   = "mysqlHealth"
+	pluginName  string   = "pgsqlHealth"
 	up          string   = "up"
 	down        string   = "down"
 	configFiles []string = []string{"db.yml"}

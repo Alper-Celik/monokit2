@@ -7,7 +7,7 @@ import (
 	"github.com/rs/zerolog"
 )
 
-var imageNames = [...]string{"postgres", "PostgreSQL", "pgvector"}
+var imageNames = [...]string{"postgres", "postgresql", "pgvector"}
 
 func IsPsqlInDocker(logger zerolog.Logger) bool {
 	if _, err := exec.LookPath("docker"); err == nil {
@@ -16,16 +16,14 @@ func IsPsqlInDocker(logger zerolog.Logger) bool {
 			"-a",
 			"--format", "{{.Image}}",
 		).Output()
-		if err != nil {
-			logger.Debug().Err(err).Msg("IsPsqlInDockerInDocker: docker ps failed, assuming not in Docker")
-			return false
+			logger.Debug().Err(err).Msg("IsPsqlInDocker: docker ps failed, assuming not in Docker")
 		}
 
 		for _, line := range strings.Split(strings.TrimSpace(string(out)), "\n") {
 			lower := strings.ToLower(line)
 			for _, image := range imageNames {
 				if strings.Contains(lower, image) {
-					logger.Debug().Str("image", line).Msg("IsMysqlInDocker: detected via docker ps")
+					logger.Debug().Str("image", line).Msg("IsPsqlInDocker: detected via docker ps")
 					return true
 				}
 			}
